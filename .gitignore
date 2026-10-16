@@ -1,1 +1,13 @@
-/nbproject/
+/target/
+
+*.class
+*.jar
+
+/nbproject/private/
+
+/.vs/
+.idea/
+.vscode/
+
+.DS_Store
+Thumbs.db
