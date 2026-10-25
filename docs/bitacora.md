@@ -107,3 +107,38 @@ La incorporación del pensum completo y el desarrollo de una interfaz web se rea
 Aprendizaje:
 En el desarrollo de software es necesario controlar el alcance y priorizar estabilidad, pruebas y cumplimiento de requisitos antes de agregar nuevas funcionalidades.
 
+
+
+
+## Dificultad 6 - Validación integral mediante pruebas unitarias
+Fecha:  
+24/10/2026
+
+Problema:  
+Era necesario comprobar que las diferentes partes del sistema funcionaran de manera integrada y que las modificaciones realizadas durante el desarrollo no afectaran otras funcionalidades.
+
+Causa:  
+El sistema combina autenticación, estructuras de datos, reglas académicas y algoritmos sobre grafos, por lo que una revisión manual no era suficiente para garantizar que todas las funciones continuaran operando correctamente.
+
+Solución:  
+Se implementó y ejecutó una suite automatizada de pruebas mediante JUnit 5, organizada en tres clases:
+- AutenticacionServiceTest
+- PlanificadorAcademicoTest
+- EstructurasTest
+
+La suite completa ejecutó 18 pruebas relacionadas con autenticación, estructuras de datos, búsqueda de materias, disponibilidad académica, prerrequisitos, validaciones de relaciones, detección de ciclos y ordenamiento topológico.
+
+Resultado:  
+Las 18 pruebas finalizaron correctamente, obteniéndose:
+
+- 18 pruebas ejecutadas.
+- 0 fallos.
+- 0 errores.
+- 0 pruebas omitidas.
+- BUILD SUCCESS.
+
+Decisión:  
+Mantener las pruebas automatizadas como mecanismo de validación para futuras modificaciones del proyecto, especialmente durante la tercera etapa.
+
+Aprendizaje:  
+Las pruebas unitarias permiten detectar errores de forma temprana y proporcionan una manera repetible de comprobar que las funcionalidades existentes continúan operando correctamente después de realizar cambios en el sistema.
