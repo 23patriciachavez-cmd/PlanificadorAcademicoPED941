@@ -1,0 +1,13 @@
+operacion,iteraciones_por_repeticion,repeticiones,media_microsegundos,mediana_microsegundos
+Busqueda de materia existente,200,5,0.803600,0.767500
+Busqueda de materia inexistente,200,5,0.198200,0.180500
+Listado completo del pensum,200,5,1.035600,0.837000
+Consulta de prerrequisitos,200,5,3.588700,3.024000
+Materias disponibles,200,5,55.562900,55.784000
+Materias bloqueadas,200,5,42.897700,41.169500
+Deteccion de ciclos DFS,200,5,7.337200,7.992500
+Ordenamiento topologico Kahn,200,5,9.465600,8.047500
+Arbol curricular,200,5,34.951800,24.713000
+Calculo del progreso,200,5,22.081500,15.429500
+Simulador del proximo ciclo,200,5,9.633500,7.640500
+Busqueda de electiva,200,5,1.371900,1.186000

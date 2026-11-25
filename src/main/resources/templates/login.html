@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Inicio de sesión | PED941</title>
+
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
+    <style>
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(
+                135deg, #102e4d, #27608f);
+        }
+
+        .login {
+            width: min(440px, 92%);
+            padding: 36px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 15px 45px rgba(0,0,0,.25);
+        }
+
+        .login h1 {
+            color: #173b63;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .login label {
+            display: block;
+            margin: 18px 0 8px;
+            font-weight: 600;
+        }
+
+        .login button {
+            width: 100%;
+            margin-top: 22px;
+        }
+
+        .institucion {
+            color: #27608f;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .pie-login {
+            margin-top: 25px;
+            color: #697586;
+            text-align: center;
+            font-size: 13px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <section class="login">
+
+        <p class="institucion">
+            UNIVERSIDAD DON BOSCO | PED941
+        </p>
+
+        <h1>Planificador Académico</h1>
+
+        <p>
+            Ingeniería en Ciencias de la Computación
+        </p>
+
+        <h2>Iniciar sesión</h2>
+
+        <div class="alerta" th:if="${param.error}">
+            Usuario o contraseña incorrectos.
+        </div>
+
+        <p th:if="${param.logout}"
+           style="color:#16815d">
+
+            Sesión cerrada correctamente.
+
+        </p>
+
+        <form th:action="@{/login}" method="post">
+
+            <label for="username">Usuario</label>
+
+            <input type="text"
+                   id="username"
+                   name="username"
+                   autocomplete="username"
+                   placeholder="Ingrese su usuario"
+                   required autofocus>
+
+            <label for="password">Contraseña</label>
+
+            <input type="password"
+                   id="password"
+                   name="password"
+                   autocomplete="current-password"
+                   placeholder="Ingrese su contraseña"
+                   required>
+
+            <button type="submit"
+                    class="boton primario">
+
+                Ingresar al sistema
+
+            </button>
+
+        </form>
+
+        <div class="pie-login">
+
+            Proyecto de Cátedra · Etapa III
+
+            <p>
+                Java · Spring Boot · H2 Database
+            </p>
+
+        </div>
+
+    </section>
+
+</body>
+</html>
