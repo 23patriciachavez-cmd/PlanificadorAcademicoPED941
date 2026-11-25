@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Estudiante | Planificador Académico</title>
+
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
+</head>
+
+<body>
+
+<header class="encabezado">
+
+    <div class="contenedor">
+
+        <p class="etiqueta">
+            UNIVERSIDAD DON BOSCO | PED941 | ETAPA III
+        </p>
+
+        <h1>Planificador Académico</h1>
+
+        <p class="subtitulo">
+            Ingeniería en Ciencias de la Computación |
+            Perfil estudiante
+        </p>
+
+        <nav class="navegacion">
+
+            <a href="#progreso">Progreso</a>
+
+            <a href="#simulador">Simulador</a>
+
+            <a href="#consulta">Prerrequisitos</a>
+
+            <a href="#electivas">Electivas</a>
+
+            <a href="#pensum">Pensum completo</a>
+
+        </nav>
+
+        <form th:action="@{/logout}"
+              method="post"
+              style="margin-top:15px">
+
+            <button type="submit"
+                    class="boton secundario">
+
+                Cerrar sesión
+
+            </button>
+
+        </form>
+
+    </div>
+
+</header>
+
+<main class="contenedor">
+
+    <!-- MENSAJES -->
+
+    <div th:if="${mensaje != null}"
+         th:text="${mensaje}"
+         style="padding:15px;
+                margin-bottom:18px;
+                background:#e8f5ef;
+                color:#16815d;
+                border-radius:9px;">
+    </div>
+
+    <div class="alerta"
+         th:if="${error != null}"
+         th:text="${error}">
+    </div>
+
+    <!-- ESTADO DEL PENSUM -->
+
+    <section class="estado-pensum">
+
+        <div>
+
+            <strong>Pensum ICC 2024-2027</strong>
+
+            <span th:text="${totalMaterias
+                    + ' espacios curriculares | '
+                    + totalUV + ' UV'}">
+            </span>
+
+        </div>
+
+        <span class="estado-valido"
+              th:classappend="${pensumValido
+                    ? ' correcto' : ' incorrecto'}"
+              th:text="${pensumValido
+                    ? 'VALIDACIÓN BÁSICA CORRECTA'
+                    : 'REVISAR PENSUM'}">
+        </span>
+
+    </section>
+
+    <!-- INDICADORES -->
+
+    <section class="metricas">
+
+        <article class="tarjeta">
+
+            <span>Materias aprobadas</span>
+
+            <strong th:text="${materiasAprobadas
+                    + ' / ' + totalMaterias}">
+            </strong>
+
+        </article>
+
+        <article class="tarjeta">
+
+            <span>UV aprobadas</span>
+
+            <strong th:text="${uvAprobadas
+                    + ' / ' + totalUV}">
+            </strong>
+
+        </article>
+
+        <article class="tarjeta">
+
+            <span>Avance académico por UV</span>
+
+            <strong th:text="${#numbers.formatDecimal(
+                    porcentajeUV, 1, 2) + '%'}">
+            </strong>
+
+        </article>
+
+        <article class="tarjeta">
+
+            <span>Próximo ciclo</span>
+
+            <strong th:text="${siguienteCiclo == 0
+                    ? 'Completado'
+                    : 'Ciclo ' + siguienteCiclo}">
+            </strong>
+
+        </article>
+
+    </section>
+
+    <!-- PROGRESO -->
+
+    <section class="panel" id="progreso">
+
+        <div class="titulo-seccion">
+
+            <div>
+
+                <h2>Progreso académico</h2>
+
+                <p>Seguimiento del avance académico.</p>
+
+            </div>
+
+        </div>
+
+        <div class="progreso-detalle">
+
+            <strong>Avance por materias</strong>
+
+            <span th:text="${#numbers.formatDecimal(
+                    porcentajeMaterias, 1, 2) + '%'}">
+            </span>
+
+        </div>
+
+        <div class="barra">
+
+            <div class="barra-avance"
+                 th:style="${'width:' + porcentajeMaterias + '%'}">
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="progreso-detalle">
+
+            <strong>Avance por unidades valorativas</strong>
+
+            <span th:text="${#numbers.formatDecimal(
+                    porcentajeUV, 1, 2) + '%'}">
+            </span>
+
+        </div>
+
+        <div class="barra">
+
+            <div class="barra-avance"
+                 th:style="${'width:' + porcentajeUV + '%'}">
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- SIMULADOR -->
+
+    <section class="panel" id="simulador">
+
+        <div class="titulo-seccion">
+
+            <div>
+
+                <h2>Simulador del próximo ciclo</h2>
+
+                <p th:if="${siguienteCiclo != 0}"
+                   th:text="${'Materias habilitadas para el ciclo '
+                         + siguienteCiclo}">
+                </p>
+
+                <p th:if="${siguienteCiclo == 0}">
+                    Plan de estudios completado.
+                </p>
+
+            </div>
+
+            <span class="contador"
+                  th:text="${cantidadProximoCiclo + ' materias'}">
+            </span>
+
+        </div>
+
+        <div class="rejilla-materias">
+
+            <article class="materia-mini"
+                     th:each="m : ${proximoCiclo}">
+
+                <strong th:text="${m.codigo}"></strong>
+
+                <span th:text="${m.nombre}"></span>
+
+                <small th:text="${m.creditos + ' UV'}"></small>
+
+            </article>
+
+        </div>
+
+        <p class="mensaje-vacio"
+           th:if="${#lists.isEmpty(proximoCiclo)
+                 and siguienteCiclo != 0}">
+
+            No hay materias habilitadas para este ciclo.
+
+        </p>
+
+    </section>
+
+    <!-- CONSULTAS -->
+
+    <section class="panel" id="consulta">
+
+        <h2>Analizar una materia</h2>
+
+        <p>
+            Consulta prerrequisitos, dependientes
+            y cadena completa.
+        </p>
+
+        <form class="formulario"
+              method="get"
+              th:action="@{/}">
+
+            <input name="codigo"
+                   placeholder="Ejemplo: DES104"
+                   required>
+
+            <button class="boton primario"
+                    type="submit">
+
+                Analizar materia
+
+            </button>
+
+        </form>
+
+        <div class="alerta"
+             th:if="${consultaError != null}"
+             th:text="${consultaError}">
+        </div>
+
+        <div th:if="${materiaConsulta != null}">
+
+            <div class="cabecera-materia">
+
+                <strong th:text="${materiaConsulta.codigo}">
+                </strong>
+
+                <h3 th:text="${materiaConsulta.nombre}">
+                </h3>
+
+                <span th:text="${'Ciclo '
+                        + materiaConsulta.ciclo
+                        + ' | '
+                        + materiaConsulta.creditos
+                        + ' UV'}">
+                </span>
+
+            </div>
+
+            <div class="tres-columnas">
+
+                <div>
+
+                    <h3>Prerrequisitos directos</h3>
+
+                    <ul>
+
+                        <li th:each="m : ${prerrequisitosConsulta}">
+
+                            <strong th:text="${m.codigo}"></strong>
+
+                            <span th:text="${m.nombre}"></span>
+
+                        </li>
+
+                    </ul>
+
+                    <p class="mensaje-vacio"
+                       th:if="${#lists.isEmpty(prerrequisitosConsulta)}">
+
+                        No posee prerrequisitos.
+
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <h3>Materias dependientes</h3>
+
+                    <ul>
+
+                        <li th:each="m : ${dependientesConsulta}">
+
+                            <strong th:text="${m.codigo}"></strong>
+
+                            <span th:text="${m.nombre}"></span>
+
+                        </li>
+
+                    </ul>
+
+                    <p class="mensaje-vacio"
+                       th:if="${#lists.isEmpty(dependientesConsulta)}">
+
+                        No posee dependientes directos.
+
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <h3>Cadena completa de prerrequisitos</h3>
+
+                    <ol>
+
+                        <li th:each="m : ${cadenaConsulta}">
+
+                            <strong th:text="${m.codigo}"></strong>
+
+                            <span th:text="${m.nombre}"></span>
+
+                        </li>
+
+                    </ol>
+
+                    <p class="mensaje-vacio"
+                       th:if="${#lists.isEmpty(cadenaConsulta)}">
+
+                        No existe una cadena previa.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ELECTIVAS -->
+
+    <section class="panel" id="electivas">
+
+        <h2>Catálogo de electivas</h2>
+
+        <p>
+            Selecciona una de las opciones.
+            Para cursarla debes aprobar NTI104.
+        </p>
+
+        <div class="electiva-actual"
+             th:if="${electivaSeleccionada != null}">
+
+            <div>
+
+                <span>Electiva seleccionada</span>
+
+                <strong th:text="${electivaSeleccionada.codigo
+                        + ' - ' + electivaSeleccionada.nombre}">
+                </strong>
+
+            </div>
+
+            <span class="estado-valido"
+                  th:classappend="${electivaHabilitada
+                        ? ' correcto' : ' pendiente'}"
+                  th:text="${electivaHabilitada
+                        ? 'HABILITADA'
+                        : 'REQUIERE NTI104'}">
+            </span>
+
+            <form method="post"
+                  th:action="@{/electiva/limpiar}">
+
+                <button class="boton secundario"
+                        type="submit">
+
+                    Quitar selección
+
+                </button>
+
+            </form>
+
+        </div>
+
+        <form class="formulario"
+              method="post"
+              th:action="@{/electiva/seleccionar}">
+
+            <select name="codigo" required>
+
+                <option value="">
+                    Seleccione una electiva
+                </option>
+
+                <option th:each="m : ${electivas}"
+                        th:value="${m.codigo}"
+                        th:text="${m.codigo + ' - ' + m.nombre}">
+                </option>
+
+            </select>
+
+            <button class="boton primario"
+                    type="submit">
+
+                Guardar electiva
+
+            </button>
+
+        </form>
+
+    </section>
+
+    <!-- DISPONIBILIDAD -->
+
+    <section class="dos-columnas">
+
+        <article class="panel">
+
+            <div class="titulo-seccion">
+
+                <div>
+
+                    <h2>Materias disponibles</h2>
+
+                    <p>Cumplen sus prerrequisitos directos.</p>
+
+                </div>
+
+                <span class="contador"
+                      th:text="${#lists.size(disponibles)}">
+                </span>
+
+            </div>
+
+            <ul class="lista-simple">
+
+                <li th:each="m : ${disponibles}">
+
+                    <strong th:text="${m.codigo}"></strong>
+
+                    <span th:text="${m.nombre}"></span>
+
+                </li>
+
+            </ul>
+
+        </article>
+
+        <article class="panel">
+
+            <div class="titulo-seccion">
+
+                <div>
+
+                    <h2>Materias bloqueadas</h2>
+
+                    <p>Poseen prerrequisitos pendientes.</p>
+
+                </div>
+
+                <span class="contador"
+                      th:text="${#lists.size(bloqueadas)}">
+                </span>
+
+            </div>
+
+            <ul class="lista-simple">
+
+                <li th:each="m : ${bloqueadas}">
+
+                    <strong th:text="${m.codigo}"></strong>
+
+                    <span th:text="${m.nombre}"></span>
+
+                </li>
+
+            </ul>
+
+        </article>
+
+    </section>
+
+    <!-- PENSUM -->
+
+    <section class="panel" id="pensum">
+
+        <h2>Pensum completo</h2>
+
+        <p>
+            Registra las materias que ya has aprobado.
+            Esta operación registra tu historial académico;
+            no constituye una inscripción oficial.
+        </p>
+
+        <div class="formulario">
+
+            <input id="filtro"
+                   placeholder="Buscar por código, materia o ciclo"
+                   oninput="filtrarMaterias()">
+
+        </div>
+
+        <div class="tabla-contenedor">
+
+            <table id="tablaMaterias">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Código</th>
+                        <th>Materia</th>
+                        <th>Ciclo</th>
+                        <th>UV</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr th:each="m : ${materias}"
+                        th:classappend="${m.aprobada
+                              ? ' fila-aprobada' : ''}">
+
+                        <td th:text="${m.codigo}"></td>
+
+                        <td th:text="${m.nombre}"></td>
+
+                        <td th:text="${m.ciclo}"></td>
+
+                        <td th:text="${m.creditos}"></td>
+
+                        <td>
+
+                            <span class="estado"
+                                  th:classappend="${m.aprobada
+                                        ? ' aprobado' : ' pendiente'}"
+                                  th:text="${m.aprobada
+                                        ? 'APROBADA' : 'PENDIENTE'}">
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <form method="post"
+                                  th:action="@{/materias/{codigo}/estado(
+                                      codigo=${m.codigo})}">
+
+                                <button class="boton-tabla"
+                                        type="submit"
+                                        th:text="${m.aprobada
+                                              ? 'Desmarcar'
+                                              : 'Aprobar'}">
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+
+    <strong>Universidad Don Bosco</strong>
+
+    <p>
+        Programación con Estructuras de Datos | PED941
+    </p>
+
+    <p>
+        Planificador Académico con Prerrequisitos
+    </p>
+
+    <p>
+        Java · Spring Boot · Spring Security · Thymeleaf · H2
+    </p>
+
+</footer>
+
+<script>
+
+    function filtrarMaterias() {
+
+        const filtro = document
+            .getElementById("filtro")
+            .value
+            .toLowerCase();
+
+        document
+            .querySelectorAll("#tablaMaterias tbody tr")
+            .forEach(fila => {
+
+                fila.style.display =
+                    fila.textContent.toLowerCase().includes(filtro)
+                    ? ""
+                    : "none";
+
+            });
+    }
+
+</script>
+
+</body>
+</html>

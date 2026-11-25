@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Administrador | Planificador Académico</title>
+
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
+    <style>
+
+        .form-admin {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-admin label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+
+        .form-admin button {
+            grid-column: 1 / -1;
+        }
+
+        .form-admin input[type="checkbox"] {
+            width: auto;
+            min-height: auto;
+        }
+
+        .mensaje-exito {
+            padding: 16px;
+            border-radius: 10px;
+            background: #e8f5ef;
+            color: #16815d;
+            margin-bottom: 20px;
+        }
+
+        pre {
+            padding: 20px;
+            background: #102e4d;
+            color: #e4edf6;
+            overflow: auto;
+            max-height: 450px;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        details summary {
+            cursor: pointer;
+            color: #173b63;
+            font-weight: 700;
+            padding: 12px 0;
+        }
+
+        @media (max-width: 600px) {
+            .form-admin {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header class="encabezado">
+
+    <div class="contenedor">
+
+        <p class="etiqueta">
+            UNIVERSIDAD DON BOSCO | PED941
+        </p>
+
+        <h1>Panel del administrador</h1>
+
+        <p class="subtitulo">
+            Gestión del plan de estudios y del grafo académico
+        </p>
+
+        <nav class="navegacion">
+
+            <a href="#materias">Materias</a>
+            <a href="#relaciones">Prerrequisitos</a>
+            <a href="#grafo">Grafo académico</a>
+            <a href="#kahn">Orden topológico</a>
+            <a href="#catalogo">Electivas</a>
+
+        </nav>
+
+        <form th:action="@{/logout}"
+              method="post"
+              style="margin-top:15px">
+
+            <button class="boton secundario"
+                    type="submit">
+
+                Cerrar sesión
+
+            </button>
+
+        </form>
+
+    </div>
+
+</header>
+
+<main class="contenedor">
+
+    <div class="mensaje-exito"
+         th:if="${mensaje != null}"
+         th:text="${mensaje}">
+    </div>
+
+    <div class="alerta"
+         th:if="${error != null}"
+         th:text="${error}">
+    </div>
+
+    <!-- INDICADORES -->
+
+    <section class="metricas">
+
+        <article class="tarjeta">
+
+            <span>Materias registradas</span>
+
+            <strong th:text="${totalMaterias}"></strong>
+
+        </article>
+
+        <article class="tarjeta">
+
+            <span>Unidades valorativas</span>
+
+            <strong th:text="${totalUV}"></strong>
+
+        </article>
+
+        <article class="tarjeta">
+
+            <span>Dependencias circulares</span>
+
+            <strong th:text="${grafoSinCiclos ? 'NO' : 'SÍ'}">
+            </strong>
+
+        </article>
+
+        <article class="tarjeta">
+
+            <span>Opciones electivas</span>
+
+            <strong th:text="${#lists.size(electivas)}">
+            </strong>
+
+        </article>
+
+    </section>
+
+    <!-- VALIDACION -->
+
+    <section class="panel">
+
+        <h2>Validación estructural del pensum</h2>
+
+        <p>Referencia curricular: 40 materias y 161 UV.</p>
+
+        <p>
+            Resultado:
+
+            <strong th:text="${pensumValido
+                    ? 'Cumple la referencia y no contiene ciclos'
+                    : 'El pensum requiere revisión'}">
+            </strong>
+
+        </p>
+
+    </section>
+
+    <!-- REGISTRO Y MODIFICACION -->
+
+    <section class="dos-columnas" id="materias">
+
+        <article class="panel">
+
+            <h2>Registrar nueva materia</h2>
+
+            <form class="form-admin"
+                  method="post"
+                  th:action="@{/admin/registrar}">
+
+                <div>
+
+                    <label>Código</label>
+
+                    <input name="codigo"
+                           maxlength="20"
+                           required>
+
+                </div>
+
+                <div>
+
+                    <label>Nombre</label>
+
+                    <input name="nombre"
+                           maxlength="250"
+                           required>
+
+                </div>
+
+                <div>
+
+                    <label>UV</label>
+
+                    <input type="number"
+                           name="uv"
+                           min="1" max="30"
+                           value="4"
+                           required>
+
+                </div>
+
+                <div>
+
+                    <label>Ciclo</label>
+
+                    <input type="number"
+                           name="ciclo"
+                           min="1" max="10"
+                           required>
+
+                </div>
+
+                <div>
+
+                    <label>Área académica</label>
+
+                    <input name="area"
+                           value="ICC"
+                           required>
+
+                </div>
+
+                <div>
+
+                    <label>Obligatoria</label>
+
+                    <input type="checkbox"
+                           name="obligatoria"
+                           value="true"
+                           checked>
+
+                </div>
+
+                <button class="boton primario"
+                        type="submit">
+
+                    Registrar materia
+
+                </button>
+
+            </form>
+
+        </article>
+
+        <article class="panel">
+
+            <h2>Modificar materia</h2>
+
+            <form class="form-admin"
+                  method="post"
+                  th:action="@{/admin/modificar}">
+
+                <div>
+
+                    <label>Código</label>
+
+                    <select name="codigo"
+                            id="modificarCodigo"
+                            onchange="cargarDatosMateria()"
+                            required>
+
+                        <option value="">Seleccione</option>
+
+                        <option th:each="m : ${materias}"
+                                th:if="${m.codigo != 'ELEC38'}"
+                                th:value="${m.codigo}"
+                                th:text="${m.codigo}"
+                                th:attr="data-nombre=${m.nombre},
+                                         data-uv=${m.creditos},
+                                         data-ciclo=${m.ciclo},
+                                         data-area=${m.area},
+                                         data-obligatoria=${m.obligatoria}">
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div>
+
+                    <label>Nombre</label>
+
+                    <input name="nombre"
+                           id="modificarNombre"
+                           required>
+
+                </div>
+
+                <div>
+
+                    <label>UV</label>
+
+                    <input type="number"
+                           name="uv"
+                           id="modificarUV"
+                           min="1" max="30"
+                           required>
+
+                </div>
+
+                <div>
+
+                    <label>Ciclo</label>
+
+                    <input type="number"
+                           name="ciclo"
+                           id="modificarCiclo"
+                           min="1" max="10"
+                           required>
+
+                </div>
+
+                <div>
+
+                    <label>Área</label>
+
+                    <input name="area"
+                           id="modificarArea"
+                           required>
+
+                </div>
+
+                <div>
+
+                    <label>Obligatoria</label>
+
+                    <input type="checkbox"
+                           name="obligatoria"
+                           id="modificarObligatoria"
+                           value="true">
+
+                </div>
+
+                <button type="submit"
+                        class="boton primario">
+
+                    Guardar modificación
+
+                </button>
+
+            </form>
+
+        </article>
+
+    </section>
+
+    <!-- PRERREQUISITOS -->
+
+    <section class="dos-columnas" id="relaciones">
+
+        <article class="panel">
+
+            <h2>Agregar prerrequisito</h2>
+
+            <p>
+                El sistema verificará que la relación no
+                genere dependencias circulares.
+            </p>
+
+            <form method="post"
+                  th:action="@{/admin/agregar-prerrequisito}">
+
+                <label>Materia prerrequisito</label>
+
+                <input name="origen"
+                       placeholder="Ejemplo: PRE104"
+                       required>
+
+                <br><br>
+
+                <label>Materia dependiente</label>
+
+                <input name="destino"
+                       placeholder="Ejemplo: POO104"
+                       required>
+
+                <br><br>
+
+                <button class="boton primario"
+                        type="submit">
+
+                    Agregar relación
+
+                </button>
+
+            </form>
+
+        </article>
+
+        <article class="panel">
+
+            <h2>Eliminar prerrequisito</h2>
+
+            <p>
+                Elimina una relación existente entre materias.
+            </p>
+
+            <form method="post"
+                  th:action="@{/admin/eliminar-prerrequisito}">
+
+                <label>Materia prerrequisito</label>
+
+                <input name="origen" required>
+
+                <br><br>
+
+                <label>Materia dependiente</label>
+
+                <input name="destino" required>
+
+                <br><br>
+
+                <button class="boton secundario"
+                        type="submit">
+
+                    Eliminar relación
+
+                </button>
+
+            </form>
+
+        </article>
+
+    </section>
+
+    <!-- PENSUM -->
+
+    <section class="panel">
+
+        <h2>Materias del plan de estudios</h2>
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Materia</th>
+                        <th>Ciclo</th>
+                        <th>UV</th>
+                        <th>Área</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr th:each="m : ${materias}">
+
+                        <td th:text="${m.codigo}"></td>
+
+                        <td th:text="${m.nombre}"></td>
+
+                        <td th:text="${m.ciclo}"></td>
+
+                        <td th:text="${m.creditos}"></td>
+
+                        <td th:text="${m.area}"></td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- GRAFO Y ARBOL -->
+
+    <section class="panel" id="grafo">
+
+        <h2>Grafo académico</h2>
+
+        <p>
+            Representación de las dependencias mediante
+            listas de adyacencia.
+        </p>
+
+        <details>
+
+            <summary>Visualizar grafo</summary>
+
+            <pre th:text="${grafo}"></pre>
+
+        </details>
+
+        <details>
+
+            <summary>Visualizar árbol curricular</summary>
+
+            <pre th:text="${pensumJerarquico}"></pre>
+
+        </details>
+
+    </section>
+
+    <!-- KAHN -->
+
+    <section class="panel" id="kahn">
+
+        <h2>Ordenamiento topológico - Kahn</h2>
+
+        <p>
+            Secuencia que respeta los prerrequisitos
+            del grafo académico.
+        </p>
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Orden</th>
+                        <th>Código</th>
+                        <th>Materia</th>
+                        <th>Ciclo curricular</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr th:each="m, estado : ${orden}">
+
+                        <td th:text="${estado.count}"></td>
+
+                        <td th:text="${m.codigo}"></td>
+
+                        <td th:text="${m.nombre}"></td>
+
+                        <td th:text="${m.ciclo}"></td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- ELECTIVAS -->
+
+    <section class="panel" id="catalogo">
+
+        <h2>Catálogo de electivas</h2>
+
+        <ul class="lista-simple">
+
+            <li th:each="m : ${electivas}">
+
+                <strong th:text="${m.codigo}"></strong>
+
+                <span th:text="${m.nombre}"></span>
+
+            </li>
+
+        </ul>
+
+    </section>
+
+</main>
+
+<footer>
+
+    <strong>Universidad Don Bosco</strong>
+
+    <p>
+        PED941 | Panel administrativo | Etapa III
+    </p>
+
+</footer>
+
+<script>
+
+    function cargarDatosMateria() {
+
+        const selector =
+            document.getElementById("modificarCodigo");
+
+        const opcion =
+            selector.options[selector.selectedIndex];
+
+        if (!opcion.value) {
+            return;
+        }
+
+        document.getElementById("modificarNombre").value =
+            opcion.dataset.nombre;
+
+        document.getElementById("modificarUV").value =
+            opcion.dataset.uv;
+
+        document.getElementById("modificarCiclo").value =
+            opcion.dataset.ciclo;
+
+        document.getElementById("modificarArea").value =
+            opcion.dataset.area;
+
+        document.getElementById("modificarObligatoria").checked =
+            opcion.dataset.obligatoria === "true";
+    }
+
+</script>
+
+</body>
+</html>
