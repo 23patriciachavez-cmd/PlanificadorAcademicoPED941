@@ -1,13 +1,34 @@
-/target/
-
+# MAVEN Y JAVA
+target/
 *.class
 *.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
 
-/nbproject/private/
+# NETBEANS
+nbproject/private/
+build/
+dist/
 
-/.vs/
+# VISUAL STUDIO
+.vs/
+
+# BASE DE DATOS H2
+data/
+*.mv.db
+*.trace.db
+*.lock.db
+
+# ARCHIVOS TEMPORALES
+*.log
+*.tmp
+
+# CONFIGURACIONES LOCALES
 .idea/
 .vscode/
+*.iml
+.env
 
+# SISTEMA OPERATIVO
 .DS_Store
 Thumbs.db
